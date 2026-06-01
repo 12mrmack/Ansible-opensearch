@@ -1,4 +1,4 @@
-@Library('opensearch-library') _
+@Library('Library_function') _
 
 def cfg = load 'deploy-config.groovy'
 
