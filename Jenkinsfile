@@ -1,11 +1,18 @@
 @Library('Library_function') _
 
-def cfg = load 'deploy-config.groovy'
-
 pipeline {
     agent any
 
     stages {
+
+        stage('Load Config') {
+            steps {
+                script {
+                    cfg = load 'deploy-config.groovy'
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
