@@ -1,0 +1,61 @@
+---
+- name: Install OpenSearch
+  hosts: opensearch
+  become: yes
+
+  vars:
+    opensearch_version: "2.19.1"
+
+  tasks:
+
+    - name: Install required packages
+      apt:
+        name:
+          - wget
+          - curl
+          - gnupg
+          - apt-transport-https
+        state: present
+        update_cache: yes
+
+    - name: Import OpenSearch GPG key
+      apt_key:
+        url: https://artifacts.opensearch.org/publickeys/opensearch.pgp
+        state: present
+
+    - name: Add OpenSearch repository
+      apt_repository:
+        repo: "deb https://artifacts.opensearch.org/releases/bundle/opensearch/2.x/apt stable main"
+        state: present
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install OpenSearch
+      environment:
+        OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Admin@123456"
+      apt:
+        name: opensearch
+        state: present
+
+    - name: Configure OpenSearch
+      template:
+        src: templates/opensearch.yml.j2
+        dest: /etc/opensearch/opensearch.yml
+        owner: root
+        group: opensearch
+        mode: '0660'
+      notify: restart opensearch
+
+    - name: Enable and start OpenSearch
+      systemd:
+        name: opensearch
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart opensearch
+      systemd:
+        name: opensearch
+        state: restarted
